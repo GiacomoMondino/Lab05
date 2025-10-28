@@ -1,7 +1,7 @@
 import flet as ft
 from alert import AlertManager
 from autonoleggio import Autonoleggio
-
+from automobile import Automobile
 FILE_AUTO = "automobili.csv"
 
 def main(page: ft.Page):
@@ -37,6 +37,12 @@ def main(page: ft.Page):
 
     # Tutti i TextField per le info necessarie per aggiungere una nuova automobile (marca, modello, anno, contatore posti)
     # TODO
+    cifra_corrente= ft.Text(disabled=True, color="grey",
+                            size= 15, width=25, text_align=ft.TextAlign.CENTER,)
+    cifra_corrente.value='0'
+    input_marca= ft.TextField(label= "Marca", width=300 )
+    input_modello= ft.TextField(label="Modello", width=300)
+    input_anno= ft.TextField(label= "Anno", width=300)
 
     # --- FUNZIONI APP ---
     def aggiorna_lista_auto():
@@ -59,13 +65,51 @@ def main(page: ft.Page):
 
     # Handlers per la gestione dei bottoni utili all'inserimento di una nuova auto
     # TODO
+    def aggiungi_automobile(e):
+        if str(input_anno.value).isdigit():
+            auto = Automobile(input_marca.value.strip(), input_modello.value.strip(),
+                              int(input_anno.value), int(cifra_corrente.value))
+            autonoleggio.automobili.append(auto)
+            aggiorna_lista_auto()
+            input_marca.value = ''
+            input_anno.value = ''
+            input_modello.value = ''
+            cifra_corrente.value = '0'
+            input_marca.update()
+            input_modello.update()
+            input_anno.update()
+            cifra_corrente.update()
+            page.update()
+        else:
+            alert.show_alert("Errore: inserisci valore numerico per anno")
+
+    def bottoneMeno(e):
+        valore = int(cifra_corrente.value)
+        if int(cifra_corrente.value)>0:
+            valore = valore -1
+            cifra_corrente.value= str(valore)
+            cifra_corrente.update()
+
+    def bottonePiu(e):
+        valore= int(cifra_corrente.value)
+        valore= valore+1
+        cifra_corrente.value= str(valore)
+        cifra_corrente.update()
 
     # --- EVENTI ---
     toggle_cambia_tema = ft.Switch(label="Tema scuro", value=True, on_change=cambia_tema)
     pulsante_conferma_responsabile = ft.ElevatedButton("Conferma", on_click=conferma_responsabile)
 
+
     # Bottoni per la gestione dell'inserimento di una nuova auto
     # TODO
+    pulsante_aggiungi_automobile= ft.ElevatedButton("Aggiugi automobile", on_click=aggiungi_automobile)
+    pulsanteMeno= ft.IconButton(icon= ft.Icons.REMOVE,
+                                icon_size=15, icon_color="red",
+                                on_click=bottoneMeno)
+    pulsantePiu=ft.IconButton(icon=ft.Icons.ADD,
+                              icon_size=15, icon_color="green",
+                              on_click=bottonePiu)
 
     # --- LAYOUT ---
     page.add(
@@ -84,6 +128,14 @@ def main(page: ft.Page):
 
         # Sezione 3
         # TODO
+        ft.Text("Aggiungi nuova automobile", size= 20, text_align= ft.MainAxisAlignment.CENTER),
+        ft.Row(spacing=35,
+               controls=[input_marca, input_modello,
+                         input_anno, pulsanteMeno, cifra_corrente, pulsantePiu],
+               alignment=ft.MainAxisAlignment.CENTER),
+        ft.Row(spacing=200,
+               controls=[pulsante_aggiungi_automobile],
+               alignment=ft.MainAxisAlignment.CENTER),
 
         # Sezione 4
         ft.Divider(),
